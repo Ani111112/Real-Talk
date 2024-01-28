@@ -2,6 +2,7 @@ package com.example.RealTalk.controller;
 
 import com.example.RealTalk.model.MessageInfo;
 import com.example.RealTalk.model.Reference;
+import com.example.RealTalk.model.User;
 import com.example.RealTalk.service.RetrivalRestService;
 import com.example.RealTalk.service.SaveRestService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "http://127.0.0.1:5500")
 public class Controller {
     @Autowired
     SaveRestService saveRestService;
@@ -28,14 +30,14 @@ public class Controller {
         }
         return response;
     }
-    @GetMapping("/save/signin")
-    public <T>ResponseEntity signin(@RequestParam String mobNo, @RequestParam String password) {
+    @PostMapping("/save/signin")
+    public <T>ResponseEntity signin(@RequestBody T object) {
         ResponseEntity response = null;
         try {
-            String object = saveRestService.login(mobNo, password);
-            response = new ResponseEntity<>(object, HttpStatus.ACCEPTED);
+            User savedUser = (User) saveRestService.login(object);
+            response = new ResponseEntity<>(savedUser, HttpStatus.ACCEPTED);
         } catch (Exception exception) {
-            response = new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
+            response = new ResponseEntity<>(exception.getMessage(), HttpStatus.FORBIDDEN);
         }
         return response;
     }
@@ -57,11 +59,11 @@ public class Controller {
         return new ResponseEntity<>(message, HttpStatus.ACCEPTED);
     }
 
-    @GetMapping("/retrival/get-message")
-    public <T>ResponseEntity getMessages(@RequestParam("rid") T reciverId, @RequestBody T object) {
+    @PostMapping("/retrival/get-message")
+    public <T>ResponseEntity getMessages(@RequestBody T object) {
         ResponseEntity responseEntity = null;
         try {
-            List<MessageInfo> userMessages = retrivalRestService.getMessage(reciverId, object);
+            List<MessageInfo> userMessages = retrivalRestService.getMessage(object);
             responseEntity = new ResponseEntity<>(userMessages, HttpStatus.ACCEPTED);
         }catch (Exception exception) {
             responseEntity = new ResponseEntity<>("No Data Return", HttpStatus.BAD_REQUEST);

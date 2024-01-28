@@ -25,12 +25,16 @@ public class SaveRestService {
         return (T) collectionHandler.save(user);
     }
 
-    public <T> T login(String mobNo, String password) {
+    public <T> T login(T object) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        User user = objectMapper.convertValue(object, User.class);
+        String mobNo = user.getMobNo();
+        String password = user.getPassword();
         List<User> savedUser = collectionHandler.findDocumentByField("mobNo", mobNo, User.class);
         if (savedUser == null || savedUser.size() == 0) throw new RuntimeException("You Don't Have Any Account In this Number Try To Sign Up");
         String oldPassWord = savedUser.get(0).getPassword();
         if (!oldPassWord.equals(password)) throw new RuntimeException("You Entered Wrong Password");
-        return (T) "Sign in Successful";
+        return (T) savedUser.get(0);
     }
 
     public String saveMessage(Object object) {
