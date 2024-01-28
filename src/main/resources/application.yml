@@ -1,0 +1,6 @@
+spring:
+  data:
+    mongodb:
+      uri: "mongodb+srv://aniruddha:uuq5Di9Ao6O7ezLI@cluster1.6ahohxr.mongodb.net/realtalk?retryWrites=true&w=majority"
+      connection-pool-size: 10
+      socket-timeout: 2000
