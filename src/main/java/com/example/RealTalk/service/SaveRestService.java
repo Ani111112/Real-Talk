@@ -38,21 +38,28 @@ public class SaveRestService {
     }
 
     public String saveMessage(Object object) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        MessageInfo messageInfo = objectMapper.convertValue(object, MessageInfo.class);
-        String senderId = messageInfo.getSenderId();
-        String receiverId = messageInfo.getReceiverId();
-        List<CommunicationInfo> communicationInfoForSender = collectionHandler.findDocumentByField("userInfo._id", senderId, CommunicationInfo.class);
-        List<CommunicationInfo> communicationInfoForReciver = collectionHandler.findDocumentByField("userInfo._id", receiverId, CommunicationInfo.class);
-        messageInfo.setDate(new Date());
-        MessageInfo message = (MessageInfo) collectionHandler.save(messageInfo);
-        List<User> senderUser = collectionHandler.findDocumentByField("_id", senderId, User.class);
-        List<User> reciveUser = collectionHandler.findDocumentByField("_id", receiverId, User.class);
-        saveCommunicationInfo(communicationInfoForSender, message, senderId, receiverId, senderId, senderUser);
-        saveCommunicationInfo(communicationInfoForReciver, message, senderId, receiverId, receiverId, reciveUser);
-        return "Message Saved Successfully";
+        String messages = "";
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            MessageInfo messageInfo = objectMapper.convertValue(object, MessageInfo.class);
+            String senderId = messageInfo.getSenderId();
+            String receiverId = messageInfo.getReceiverId();
+            List<CommunicationInfo> communicationInfoForSender = collectionHandler.findDocumentByField("userInfo._id", senderId, CommunicationInfo.class);
+            List<CommunicationInfo> communicationInfoForReciver = collectionHandler.findDocumentByField("userInfo._id", receiverId, CommunicationInfo.class);
+            messageInfo.setDate(new Date());
+            MessageInfo message = (MessageInfo) collectionHandler.save(messageInfo);
+            List<User> senderUser = collectionHandler.findDocumentByField("_id", senderId, User.class);
+            List<User> reciveUser = collectionHandler.findDocumentByField("_id", receiverId, User.class);
+            saveCommunicationInfo(communicationInfoForSender, message, senderId, receiverId, senderId, senderUser);
+            saveCommunicationInfo(communicationInfoForReciver, message, receiverId, senderId, receiverId, reciveUser);
+            messages =  "Message Saved Successfully";
+        }catch (Exception exception) {
+            messages = exception.getMessage();
+        }
+        return messages;
     }
     private void saveCommunicationInfo(List<CommunicationInfo> CommunicationInfos, MessageInfo message, String senderId, String receiverId, String referenceId, List<User>users) {
+        if(senderId == null || receiverId == null) throw new RuntimeException("Id is Null");
         if (CommunicationInfos != null && CommunicationInfos.size() > 0) {
             CommunicationInfo communication = CommunicationInfos.get(0);
             HashMap<String, List<String>> communicationInfo = communication.getMessageHashMap();
@@ -66,6 +73,7 @@ public class SaveRestService {
                 messageIdList.add(message.get_id());
                 communicationInfo.put(key, messageIdList);
             }
+            communication.setMessageHashMap(communicationInfo);
             collectionHandler.save(communication);
         }else {
             CommunicationInfo communication = new CommunicationInfo();

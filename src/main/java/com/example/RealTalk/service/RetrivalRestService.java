@@ -34,18 +34,19 @@ public class RetrivalRestService {
         ObjectMapper objectMapper = new ObjectMapper();
         SenderAndReciverInfo senderAndReciverInfo = objectMapper.convertValue(object, SenderAndReciverInfo.class);
         String senderId = senderAndReciverInfo.getSenderId();
-        String reciverId = senderAndReciverInfo.getReceiverId();
+        String receiverId = senderAndReciverInfo.getReceiverId();
         List<CommunicationInfo> communicationInfos = collectionHandler.findDocumentByField("userInfo._id", senderId, CommunicationInfo.class);
+        if (communicationInfos == null || communicationInfos.size() == 0) return new ArrayList<>();
         HashMap<String, List<String>> messageIdMap = communicationInfos.get(0).getMessageHashMap();
-        String key = senderId + "_" + reciverId;
+        String key = senderId + "_" + receiverId;
         if (!messageIdMap.containsKey(key)) throw new RuntimeException("Start Conversation");
         List<String> idList = messageIdMap.get(key);
         if (idList == null || idList.size() == 0) throw new RuntimeException("No Data Return");
         List<MessageInfo> messageInfoList = collectionHandler.findDocumentsWithFieldQueries("_id", idList, MessageInfo.class);
         if (messageInfoList.size() > 10) {
             List<MessageInfo> messageInfos = new ArrayList<>();
-            int start = messageInfoList.size() - 1;
-            int end = start - 9;
+            int end = messageInfoList.size() - 1;
+            int start = end - 10;
             for (int i = start; i <= end; i++) {
                 messageInfos.add(messageInfoList.get(i));
             }

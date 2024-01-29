@@ -1,5 +1,6 @@
 package com.example.RealTalk.controller;
 
+import com.example.RealTalk.model.CommunicationInfo;
 import com.example.RealTalk.model.MessageInfo;
 import com.example.RealTalk.model.Reference;
 import com.example.RealTalk.model.User;
